@@ -3,6 +3,7 @@
 const Board = (function() {
   'use strict';
 
+  const BOARD_SIZE = 3;
   const board = [['_', '_', '_'],
                  ['_', '_', '_'],
                  ['_', '_', '_']];
@@ -19,7 +20,7 @@ const Board = (function() {
 
   function areColsFull() {
     
-    for (let col=0; col<3; col++) {
+    for (let col=0; col<BOARD_SIZE; col++) {
       let firstEntry;
       let isGameDone = true;
 
@@ -41,8 +42,34 @@ const Board = (function() {
   }
   
   function areDiagonalsFull() {
-    return false;
 
+    let firstEntry = null;
+    let isGameDone = true;
+
+    for (let i=0; i<BOARD_SIZE; i++) {
+      if (!firstEntry) {
+        firstEntry = board[i][i];
+      }
+      if ((firstEntry === '_') || (board[i][i] !== firstEntry)) {
+        isGameDone = false;
+      }
+    }
+
+    if (isGameDone) return true;
+
+    firstEntry = null;
+    isGameDone = true;
+
+    for (let i=0; i<BOARD_SIZE; i++) {
+      if (!firstEntry) {
+        firstEntry = board[BOARD_SIZE-1 -i][i];
+      }
+      if ((firstEntry === '_') || (board[BOARD_SIZE-1 - i][i] !== firstEntry)) {
+        isGameDone = false;
+      }
+    }
+
+    return isGameDone;
   }
 
   function playTurn(row, col) {
@@ -57,9 +84,6 @@ const Board = (function() {
 
 
   return {
-    areRowsFull,
-    areColsFull,
-    areDiagonalsFull,
     isDone,
   };
 
