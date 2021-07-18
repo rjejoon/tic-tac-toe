@@ -8,8 +8,6 @@ const Board = (function() {
                  ['_', '_', '_'],
                  ['_', '_', '_']];
 
-  let isPlayer1Turn = true;
-  
   function isDone() {
     return areRowsFull() || areColsFull() || areDiagonalsFull();
   }
@@ -72,21 +70,52 @@ const Board = (function() {
     return isGameDone;
   }
 
-  function playTurn(row, col) {
-    const fill = isPlayer1Turn ? 'O' : 'X';
+  function playTurn(row, col, isPlayerTurn) {
+    
+    const fill = isPlayerTurn ? 'O' : 'X';
 
-    if (board[row][col] === '_') {
+    if (isValidPlay(row, col) ) {
       board[row][col] = fill;
     }
+    else {
+      return false;
+    }
 
-    isPlayer1Turn = !isPlayer1Turn;     // change turn
+    return true;
   }
 
+  function isValidPlay(row, col) {
+    return board[row][col] === '_';
+  }
 
   return {
     isDone,
+    playTurn,
   };
 
 })();
 
-console.log(Board.isDone());
+
+const Game = (function() {
+
+  let isPlayerTurn = true;
+  let isGameDone = false;
+
+  function changeTurn() {
+    isPlayerTurn = !isPlayerTurn;
+  }
+
+  function play() {
+
+    while (!isGameDone) {
+      
+
+    }
+
+  }
+
+  return {
+    play,
+  };
+
+})();
