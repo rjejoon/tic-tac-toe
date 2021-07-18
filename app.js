@@ -19,6 +19,25 @@ const Board = (function() {
 
   function areColsFull() {
     
+    for (let col=0; col<3; col++) {
+      let firstEntry;
+      let isGameDone = true;
+
+      for (const row of board) {
+        if (!firstEntry) {
+          firstEntry = row[col];
+        }
+        if ((firstEntry === '_') || (row[col] !== firstEntry)) {
+          isGameDone = false;
+        }
+      }
+
+      if (isGameDone) {
+        return true;
+      }
+    }
+
+    return false;
   }
   
   function areDiagonalsFull() {
