@@ -10,14 +10,21 @@ const TicTacToe = (function() {
 
   let player = 0;
 
+  /**
+   * Starts a new game of Tic Tac Toee.
+   */
   function playGame() {
     bodyEle.appendChild(Narration.getElement());
     bodyEle.appendChild(Board.getBoardElement());
-    Board.initBoard();
+    Board.initBoard(BOARD_SIZE);
     Narration.setTextContent(`It's player ${player+1}'s turn!`);
     Board.enableOnClickForChildren(boardEntryOnClickListener);
   }
 
+  /**
+   * An event listener that contains a logic of the 2-player version of Tic Tac Toe.
+   * It must be attached to all children of the board.
+   */
   function boardEntryOnClickListener(e) {
     console.log(this);
     const row = this.dataset.row;
@@ -37,10 +44,12 @@ const TicTacToe = (function() {
         Narration.setTextContent(`It's player ${player+1}'s turn!`);
       }
     }
-
-
   }
   
+  /**
+   * Returns true if the current player is the winner.
+   * @returns {boolean}
+   */
   function hasPlayerWon() {
     const entry = getPlayerEntry();
     return checkCols(entry) || checkRows(entry) || checkDiags(entry);
@@ -104,20 +113,6 @@ const TicTacToe = (function() {
    */
   function isFull() {
     return Array.from(Board.getAllChildren()).every(child => child.textContent !== '');
-  }
-
-  /**
-   * Returns true if  
-   * @param {number} row 
-   * @param {number} col 
-   * @returns {boolean} 
-   */
-  function playTurn(row, col, entry) {
-    if (!isValidPlay(row, col)) {
-      return false;
-    }
-    Board.setChildTextContent(row, col, entry);
-    return true;
   }
 
   /**
