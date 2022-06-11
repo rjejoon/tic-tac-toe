@@ -41,6 +41,10 @@ const Board = (function() {
     return document.querySelectorAll(`[data-col='${col}']`);
   }
 
+  function getAllChildren() { 
+    return document.querySelectorAll(`.${bstyles["entry"]}`);
+  }
+
   function setChildTextContent(row, col, str) {
     getChild(row, col).textContent = str;
   }
@@ -70,6 +74,7 @@ const Board = (function() {
     getChild,
     getChildrenOnRow,
     getChildrenOnCol,
+    getAllChildren,
     setChildTextContent,
     enableOnClickForChildren,
     removeChildOnClickListener,

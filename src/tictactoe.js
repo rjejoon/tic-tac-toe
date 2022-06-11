@@ -30,7 +30,7 @@ const TicTacToe = (function() {
         Narration.setTextContent(`Congratulations ${player+1}! You won!`);
         Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
       } else if (isFull()) {
-        Narration.setTextContent("It's a draw");
+        Narration.setTextContent("It's a draw.");
         Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
       } else {
         changePlayer();
@@ -97,6 +97,14 @@ const TicTacToe = (function() {
     }
     return diagonals.some(diag => diag.every(child => child.textContent === entry));
   }
+  
+  /**
+   * Returns true if the board is full.
+   * @returns {boolean}
+   */
+  function isFull() {
+    return Array.from(Board.getAllChildren()).every(child => child.textContent !== '');
+  }
 
   /**
    * Returns true if  
@@ -110,15 +118,6 @@ const TicTacToe = (function() {
     }
     Board.setChildTextContent(row, col, entry);
     return true;
-  }
-  
-  /**
-   * Returns true if the board is full.
-   * @returns {boolean}
-   */
-  function isFull() {
-    return false;
-    return board.every(row => row.every(e => e !== null));
   }
 
   /**
