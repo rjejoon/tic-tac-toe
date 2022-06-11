@@ -19,10 +19,8 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 0,
-              modules: {
-                namedExport: true,
-              },
+              importLoaders: 1,
+              modules: true,
               exportType: "array"
             },
           },

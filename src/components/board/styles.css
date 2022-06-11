@@ -1,0 +1,19 @@
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  grid-template-rows: repeat(3, 1fr); 
+
+  height: 30vh;
+  width: 30vh;
+  max-height: 30vh;
+  max-width: 30vh;
+
+  border: 1px solid black;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
