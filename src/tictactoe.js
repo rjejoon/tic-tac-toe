@@ -90,13 +90,12 @@ const TicTacToe = (function() {
    * @returns boolean
    */
   function checkDiags(entry) {
-    return false;
     const diagonals = [[], []];
     for (let i=0; i<BOARD_SIZE; i++) {
-      diagonals[0].push(board[i][i]);
-      diagonals[1].push(board[i][BOARD_SIZE-1-i]);
+      diagonals[0].push(Board.getChild(i, i));
+      diagonals[1].push(Board.getChild(i, BOARD_SIZE-1-i));
     }
-    return diagonals.some(diag => diag.every(e => e === entry));
+    return diagonals.some(diag => diag.every(child => child.textContent === entry));
   }
 
   /**
