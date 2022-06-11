@@ -75,13 +75,9 @@ const TicTacToe = (function() {
    * @returns boolean
    */
   function checkCols(entry) {
-    return false;
     for (let i=0; i<BOARD_SIZE; i++) {
-      const col = [];
-      for (let j=0; j<BOARD_SIZE; j++) {
-        col.push(board[j][i]);
-      }
-      if (col.every(e => e === entry)) {
+      const col = Array.from(Board.getChildrenOnCol(i));
+      if (col.every(child => child.textContent === entry)) {
         return true;
       }
     }

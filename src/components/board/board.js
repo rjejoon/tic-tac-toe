@@ -38,7 +38,7 @@ const Board = (function() {
   }
 
   function getChildrenOnCol(col) {
-    return document.querySelectorAll(`[data-row='${col}']`);
+    return document.querySelectorAll(`[data-col='${col}']`);
   }
 
   function setChildTextContent(row, col, str) {
