@@ -9,11 +9,13 @@ const TicTacToe = (function() {
   const bodyEle = document.querySelector("body");
 
   let player = 0;
+  let mode = 0;
 
   /**
    * Starts a new game of Tic Tac Toee.
    */
-  function playGame() {
+  function playGame(gmode=0) {
+    mode = gmode;
     bodyEle.appendChild(Narration.getElement());
     bodyEle.appendChild(Board.getBoardElement());
     Board.initBoard(BOARD_SIZE);
@@ -26,7 +28,6 @@ const TicTacToe = (function() {
    * It must be attached to all children of the board.
    */
   function boardEntryOnClickListener(e) {
-    console.log(this);
     const row = this.dataset.row;
     const col = this.dataset.col;
     if (isValidPlay(row, col)) {
@@ -40,18 +41,68 @@ const TicTacToe = (function() {
         Narration.setTextContent("It's a draw.");
         Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
       } else {
-        changePlayer();
-        Narration.setTextContent(`It's player ${player+1}'s turn!`);
+        if (mode === 0) {
+          twoPlayerGame();
+        } else if (mode === 1) {
+          easyComp();
+        } else if (mode === 2) {
+          hardComp();
+        } else {
+          twoPlayerGame();
+        }
       }
     }
   }
-  
+
+  function twoPlayerGame() { 
+    changePlayer();
+    Narration.setTextContent(`It's player ${player+1}'s turn!`);
+  }
+
+  function easyComp() { 
+    Narration.setTextContent('Computer is choosing...');
+    Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+
+    // randomly select row and col
+    let row, col;
+    do {
+      row = Math.floor(Math.random() * BOARD_SIZE);
+      col = Math.floor(Math.random() * BOARD_SIZE);
+    } while (!isValidPlay(row, col));
+
+    Board.setChildTextContent(row, col, getComputerEntry());
+    if (hasComputerWon()) {
+      Narration.setTextContent(`Computer won!`);
+      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    } else if (isFull()) {
+      Narration.setTextContent("It's a draw.");
+      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    }
+    else {
+      Board.enableOnClickForChildren(boardEntryOnClickListener, true);
+      Narration.setTextContent(`It's player ${player+1}'s turn!`);
+    }
+  }
+
+  function hardComp() { 
+
+  }
+
+  function getComputerEntry() {
+    return (player === 0) ? 'X' : 'O';
+  }
+
   /**
    * Returns true if the current player is the winner.
    * @returns {boolean}
    */
   function hasPlayerWon() {
     const entry = getPlayerEntry();
+    return checkCols(entry) || checkRows(entry) || checkDiags(entry);
+  }
+
+  function hasComputerWon() { 
+    const entry = getComputerEntry();
     return checkCols(entry) || checkRows(entry) || checkDiags(entry);
   }
 

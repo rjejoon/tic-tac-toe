@@ -77,8 +77,11 @@ const Board = (function() {
    * Attaches the given event listener to all children of the board.
    * @param {function} listener 
    */
-  function enableOnClickForChildren(listener) { 
-    const children = board.querySelectorAll(`.${bstyles["entry"]}`);
+  function enableOnClickForChildren(listener, onlyValid=false) { 
+    const children = Array.from(board.querySelectorAll(`.${bstyles["entry"]}`));
+    if (onlyValid) {
+      children.filter(child => child.textContent !== '');
+    }
     children.forEach(child => {
       child.addEventListener("click", listener);
     });
