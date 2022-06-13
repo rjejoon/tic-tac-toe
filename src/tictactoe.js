@@ -187,27 +187,53 @@ const TicTacToe = (function() {
   }
 
   function hardComp() { 
+    Narration.setTextContent('Computer is choosing...');
+    Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
 
+    // find the best action for the computer
+    const actionValuePairs = A(currState()).map(a => [a, minimax(T(currState(), a))]);
+    let bestPair = actionValuePairs[0];
+    actionValuePairs.forEach(pair => {
+      if (pair[1] > bestPair[1]) {
+        bestPair = pair;
+      }
+    })
+
+    let [row, col] = bestPair[0];
+
+    Board.setChildTextContent(row, col, getComputerEntry());
+    if (hasComputerWon()) {
+      Narration.setTextContent(`Computer won!`);
+      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    } else if (isFull()) {
+      Narration.setTextContent("It's a draw.");
+      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    }
+    else {
+      changePlayer();
+      Board.enableOnClickForChildren(boardEntryOnClickListener, true);
+      Narration.setTextContent(`It's player ${player+1}'s turn!`);
+    }
   }
 
   function minimax(state, alpha=-Infinity, beta=Infinity) {
     if (isTerminal(state)) {
       return U(state);
     }
-    M = state.isComputerTurn ? Infinity : -Infinity;
+    let M = state.isComputerTurn ? -Infinity : Infinity;
     A(state).forEach(a => {
       if (state.isComputerTurn) {
-        M = max(M, minimax(T(state, a), alpha, beta));
+        M = Math.max(M, minimax(T(state, a), alpha, beta));
         if (M >= beta) {
           return M;
         }
-        alpha = max(alpha, M);
+        alpha = Math.max(alpha, M);
       } else {
-        M = min(M, minimax(T(state, a), alpha, beta));
+        M = Math.min(M, minimax(T(state, a), alpha, beta));
         if (M <= alpha) {
           return M;
         }
-        beta = min(beta, M);
+        beta = Math.min(beta, M);
       }
     });
     return M;
@@ -234,7 +260,7 @@ const TicTacToe = (function() {
    */
   function U(t_s) {
     // get the last player's entry, not the current player
-    const entry = t_s.isComputerTurn ? getPlayerEntry() : getComputerEntnry();
+    const entry = t_s.isComputerTurn ? getPlayerEntry() : getComputerEntry();
     if (stateCheckRows(t_s, entry) || stateCheckCols(t_s, entry) || stateCheckDiags(t_s, entry)) {
       return t_s.isComputerTurn ? -10 : 10;
     } 
@@ -255,7 +281,7 @@ const TicTacToe = (function() {
 
   function isTerminal(state) {
     // get the last player's entry, not the current player
-    const entry = state.isComputerTurn ? getPlayerEntry() : getComputerEntnry();
+    const entry = state.isComputerTurn ? getPlayerEntry() : getComputerEntry();
     if (stateCheckRows(state, entry) || stateCheckCols(state, entry) || stateCheckDiags(state, entry)) {
       return true;
     }
@@ -263,7 +289,7 @@ const TicTacToe = (function() {
     // check for draws
     for (let i=0; i<BOARD_SIZE; i++) {
       for (let j = 0; j < BOARD_SIZE; j++) {
-        if (state[i][j] === '') {
+        if (state.board[i][j] === '') {
           return false;
         }
       }
@@ -278,6 +304,7 @@ const TicTacToe = (function() {
   function stateCheckCols(state, entry) {
     let n_entry = 0;
     for (let i=0; i<BOARD_SIZE; i++) {
+      n_entry = 0;
       for (let j=0; j<BOARD_SIZE; j++) {
         if (state.board[j][i] === entry) {
           n_entry++;

@@ -3,4 +3,4 @@ import "./css/styles.css";
 
 import TicTacToe from "./tictactoe";
 
-TicTacToe.playGame(1);
+TicTacToe.playGame(2);
