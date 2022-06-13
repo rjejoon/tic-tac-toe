@@ -10,11 +10,11 @@ const TicTacToe = (function() {
   const bodyEle = document.querySelector("body");
 
   let player = 0;
+  let computer = 1;   // default: computer is player === 1
   // mode === 0: 2 player
   // mode === 1: easy computer
   // mode === 2: hard computer
   let mode = 0;
-  let computer = 1;   // default: computer is player === 1
 
   /**
    * Starts a new game of Tic Tac Toee.
@@ -25,7 +25,7 @@ const TicTacToe = (function() {
     bodyEle.appendChild(Board.getBoardElement());
     Board.initBoard(BOARD_SIZE);
     Narration.setTextContent(`It's player ${player+1}'s turn!`);
-    Board.enableOnClickForChildren(boardEntryOnClickListener);
+    Board.enableCellsOnClickListener(boardEntryOnClickListener);
   }
 
   /**
@@ -36,15 +36,15 @@ const TicTacToe = (function() {
     const row = this.dataset.row;
     const col = this.dataset.col;
     if (isValidPlay(row, col)) {
-      Board.setChildTextContent(row, col, getPlayerEntry());
-      Board.removeChildOnClickListener(row, col, boardEntryOnClickListener);
+      Board.setEntry(row, col, getPlayerEntry());
+      Board.removeCellOnClickListener(row, col, boardEntryOnClickListener);
 
-      if (hasPlayerWon()) {
+      if (hasWon(getPlayerEntry())) {
         Narration.setTextContent(`Congratulations player ${player+1}! You won!`);
-        Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
-      } else if (isFull()) {
+        Board.removeCellsOnClickListerners(boardEntryOnClickListener);
+      } else if (isFull(Board.getBoard())) {
         Narration.setTextContent("It's a draw.");
-        Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+        Board.removeCellsOnClickListerners(boardEntryOnClickListener);
       } else {
         changePlayer();
         if (mode === 0) {
@@ -66,7 +66,7 @@ const TicTacToe = (function() {
 
   function easyComp() { 
     Narration.setTextContent('Computer is choosing...');
-    Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    Board.removeCellsOnClickListerners(boardEntryOnClickListener);
 
     // randomly select row and col
     let row, col;
@@ -75,17 +75,17 @@ const TicTacToe = (function() {
       col = Math.floor(Math.random() * BOARD_SIZE);
     } while (!isValidPlay(row, col));
 
-    Board.setChildTextContent(row, col, getComputerEntry());
-    if (hasComputerWon()) {
+    Board.setEntry(row, col, getComputerEntry());
+    if (hasWon(getComputerEntry())) {
       Narration.setTextContent(`Computer won!`);
-      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
-    } else if (isFull()) {
+      Board.removeCellsOnClickListerners(boardEntryOnClickListener);
+    } else if (isFull(Board.getBoard())) {
       Narration.setTextContent("It's a draw.");
-      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+      Board.removeCellsOnClickListerners(boardEntryOnClickListener);
     }
     else {
       changePlayer();
-      Board.enableOnClickForChildren(boardEntryOnClickListener, true);
+      Board.enableCellsOnClickListener(boardEntryOnClickListener, true);
       Narration.setTextContent(`It's player ${player+1}'s turn!`);
     }
   }
@@ -101,14 +101,9 @@ const TicTacToe = (function() {
    * Returns true if the current player is the winner.
    * @returns {boolean}
    */
-  function hasPlayerWon() {
-    const entry = getPlayerEntry();
-    return checkCols(entry) || checkRows(entry) || checkDiags(entry);
-  }
-
-  function hasComputerWon() { 
-    const entry = getComputerEntry();
-    return checkCols(entry) || checkRows(entry) || checkDiags(entry);
+  function hasWon(playerEntry) {
+    const board = Board.getBoard();
+    return checkCols(board, playerEntry) || checkRows(board, playerEntry) || checkDiags(board, playerEntry);
   }
 
   function changePlayer() {
@@ -127,14 +122,8 @@ const TicTacToe = (function() {
    * @param entry 
    * @returns {boolean}
    */
-  function checkRows(entry) {
-    for (let i=0; i<BOARD_SIZE; i++) {
-      const row = Array.from(Board.getChildrenOnRow(i));
-      if (row.every(child => child.textContent === entry)) {
-        return true;
-      }
-    }
-    return false;
+  function checkRows(board, entry) {
+    return board.some(row => row.every(cell => cell === entry));
   }
 
   /**
@@ -142,13 +131,19 @@ const TicTacToe = (function() {
    * @param entry 
    * @returns boolean
    */
-  function checkCols(entry) {
+  function checkCols(board, entry) {
+    let n_entry = 0;
     for (let i=0; i<BOARD_SIZE; i++) {
-      const col = Array.from(Board.getChildrenOnCol(i));
-      if (col.every(child => child.textContent === entry)) {
+      n_entry = 0;
+      for (let j=0; j<BOARD_SIZE; j++) {
+        if (board[j][i] === entry) {
+          n_entry++;
+        }
+      }
+      if (n_entry === BOARD_SIZE) {
         return true;
       }
-    }
+    } 
     return false;
   }
   
@@ -157,21 +152,21 @@ const TicTacToe = (function() {
    * @param entry 
    * @returns boolean
    */
-  function checkDiags(entry) {
+  function checkDiags(board, entry) {
     const diagonals = [[], []];
     for (let i=0; i<BOARD_SIZE; i++) {
-      diagonals[0].push(Board.getChild(i, i));
-      diagonals[1].push(Board.getChild(i, BOARD_SIZE-1-i));
+      diagonals[0].push(board[i][i]);
+      diagonals[1].push(board[i][BOARD_SIZE-1-i]);
     }
-    return diagonals.some(diag => diag.every(child => child.textContent === entry));
+    return diagonals.some(diag => diag.every(cell => cell === entry));
   }
   
   /**
    * Returns true if the board is full.
    * @returns {boolean}
    */
-  function isFull() {
-    return Array.from(Board.getAllChildren()).every(child => child.textContent !== '');
+  function isFull(board) {
+    return board.every(row => row.every(cell => cell !== ''));
   }
 
   /**
@@ -183,14 +178,15 @@ const TicTacToe = (function() {
    * @returns {boolean}
    */
   function isValidPlay(row, col) {
-    return Board.getChild(row, col).textContent === '';
+    return Board.getEntry(row, col) === '';
   }
 
   function hardComp() { 
     Narration.setTextContent('Computer is choosing...');
-    Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+    Board.removeCellsOnClickListerners(boardEntryOnClickListener);
 
     // find the best action for the computer
+    // a pair: [action, action_value]
     const actionValuePairs = A(currState()).map(a => [a, minimax(T(currState(), a))]);
     let bestPair = actionValuePairs[0];
     actionValuePairs.forEach(pair => {
@@ -201,17 +197,17 @@ const TicTacToe = (function() {
 
     let [row, col] = bestPair[0];
 
-    Board.setChildTextContent(row, col, getComputerEntry());
-    if (hasComputerWon()) {
+    Board.setEntry(row, col, getComputerEntry());
+    if (hasWon(getComputerEntry())) {
       Narration.setTextContent(`Computer won!`);
-      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
-    } else if (isFull()) {
+      Board.removeCellsOnClickListerners(boardEntryOnClickListener);
+    } else if (isFull(Board.getBoard())) {
       Narration.setTextContent("It's a draw.");
-      Board.removeChildrenOnClickListerners(boardEntryOnClickListener);
+      Board.removeCellsOnClickListerners(boardEntryOnClickListener);
     }
     else {
       changePlayer();
-      Board.enableOnClickForChildren(boardEntryOnClickListener, true);
+      Board.enableCellsOnClickListener(boardEntryOnClickListener, true);
       Narration.setTextContent(`It's player ${player+1}'s turn!`);
     }
   }
@@ -261,72 +257,28 @@ const TicTacToe = (function() {
   function U(t_s) {
     // get the last player's entry, not the current player
     const entry = t_s.isComputerTurn ? getPlayerEntry() : getComputerEntry();
-    if (stateCheckRows(t_s, entry) || stateCheckCols(t_s, entry) || stateCheckDiags(t_s, entry)) {
+    if (checkRows(t_s.board, entry) || checkCols(t_s.board, entry) || checkDiags(t_s.board, entry)) {
       return t_s.isComputerTurn ? -10 : 10;
     } 
     return 0;
   }
 
   function currState() {
-    const s = {
-      board: [],
+    return {
+      board: Board.getBoard(),
       isComputerTurn: isComputerTurn(),
     };
-    for (let i = 0; i < BOARD_SIZE; i++) {
-      s.board.push([]);
-      Board.getChildrenOnRow(i).forEach(child => s.board[i].push(child.textContent));
-    }
-    return s;
   }
 
   function isTerminal(state) {
     // get the last player's entry, not the current player
     const entry = state.isComputerTurn ? getPlayerEntry() : getComputerEntry();
-    if (stateCheckRows(state, entry) || stateCheckCols(state, entry) || stateCheckDiags(state, entry)) {
+    if (checkRows(state.board, entry) || checkCols(state.board, entry) || checkDiags(state.board, entry)) {
       return true;
     }
-
-    // check for draws
-    for (let i=0; i<BOARD_SIZE; i++) {
-      for (let j = 0; j < BOARD_SIZE; j++) {
-        if (state.board[i][j] === '') {
-          return false;
-        }
-      }
-    }
-    return true;
+    return isFull(state.board);
   }
   
-  function stateCheckRows(state, entry) {
-    return state.board.some(row => row.every(cell => cell === entry));
-  }
-
-  function stateCheckCols(state, entry) {
-    let n_entry = 0;
-    for (let i=0; i<BOARD_SIZE; i++) {
-      n_entry = 0;
-      for (let j=0; j<BOARD_SIZE; j++) {
-        if (state.board[j][i] === entry) {
-          n_entry++;
-        }
-      }
-      if (n_entry === BOARD_SIZE) {
-        return true;
-      }
-    } 
-    return false;
-  }
-
-  function stateCheckDiags(state, entry) {
-    const diags = [[], []];
-    for (let i = 0; i < BOARD_SIZE; i++) {
-      diags[0].push(state.board[i][i]);
-      diags[1].push(state.board[i][BOARD_SIZE-1-i]);
-    }
-
-    return diags.some(diag => diag.every(cell => cell === entry));
-  }
-
   /**
    * An action function that returns a set of possible 
    * actions that the computer can take at a given state.

@@ -3,25 +3,30 @@ import bstyles from "./styles.css";
 const Board = (function() {
   'use strict';
 
-  const board = document.createElement("div");
-  board.classList.add(bstyles["board-grid"]);
+  let board;
+  const boardEle = document.createElement("div");
+  boardEle.classList.add(bstyles["board-grid"]);
   
   /**
-   * Initializes an empty board.
+   * Initializes an empty square dim x dim board.
    */
   function initBoard(dim) {
-    while (board.firstChild) {
-      board.removeChild(board.lastChild);
+    board = [];
+    while (boardEle.firstChild) {
+      boardEle.removeChild(boardEle.lastChild);
     }
 
     for (let i = 0; i < dim; i++) {
+      board.push([]);
       for (let j = 0; j < dim; j++) {
         const child = document.createElement("div");
         child.classList.add(bstyles["entry"]);
         child.dataset.row = i;
         child.dataset.col = j;
         child.textContent = '';
-        board.appendChild(child);
+        boardEle.appendChild(child);
+
+        board[i].push('');
       }
     }
   }
@@ -32,53 +37,45 @@ const Board = (function() {
    * @param {number} col 
    * @returns {HTMLElement}
    */
-  function getChild(row, col) {
+  function getChildElement(row, col) {
     return document.querySelector(`[data-row='${row}'][data-col='${col}']`);
   }
 
-  /**
-   * Returns all children of the board located at the specified row.
-   * @param {number} row 
-   * @returns {NodeList}
-   */
-  function getChildrenOnRow(row) {
-    return document.querySelectorAll(`[data-row='${row}']`);
+  function getEntry(row, col) {
+    return board[row][col];
   }
 
-  /**
-   * Returns all children of the board located at the specified column.
-   * @param {number} col
-   * @returns {NodeList}
-   */
-  function getChildrenOnCol(col) {
-    return document.querySelectorAll(`[data-col='${col}']`);
+  function getEntriesRow(row) {
+    return board[row];
   }
 
-  /**
-   * Returns all children of the board.
-   * @returns {NodeList}
-   */
-  function getAllChildren() { 
-    return document.querySelectorAll(`.${bstyles["entry"]}`);
+  function getEntriesCol(col) {
+    const ret = [];
+    for (let i = 0; i < board.length; i++) {
+      ret.push(board[i][col]);
+    }
+    return ret;
   }
 
   /**
    * Sets the textContent of the child element of the board 
    * located at the specified row and column.
+   * Also updates board arr.
    * @param {number} row 
    * @param {number} col 
    * @param {string} str 
    */
-  function setChildTextContent(row, col, str) {
-    getChild(row, col).textContent = str;
+  function setEntry(row, col, str) {
+    getChildElement(row, col).textContent = str;
+    board[row][col] = str;
   }
 
   /**
    * Attaches the given event listener to all children of the board.
    * @param {function} listener 
    */
-  function enableOnClickForChildren(listener, onlyValid=false) { 
-    const children = Array.from(board.querySelectorAll(`.${bstyles["entry"]}`));
+  function enableCellsOnClickListener(listener, onlyValid=false) { 
+    const children = Array.from(boardEle.querySelectorAll(`.${bstyles["entry"]}`));
     if (onlyValid) {
       children.filter(child => child.textContent !== '');
     }
@@ -94,33 +91,36 @@ const Board = (function() {
    * @param {number} col 
    * @param {function} listener 
    */
-  function removeChildOnClickListener(row, col, listener) {
-    getChild(row, col).removeEventListener("click", listener);
+  function removeCellOnClickListener(row, col, listener) {
+    getChildElement(row, col).removeEventListener("click", listener);
   }
 
   /**
    * Removes the attached listener from all children of the board.
    * @param {function} listener 
    */
-  function removeChildrenOnClickListerners(listener) { 
-    const children = board.querySelectorAll(`.${bstyles["entry"]}`);
+  function removeCellsOnClickListerners(listener) { 
+    const children = boardEle.querySelectorAll(`.${bstyles["entry"]}`);
     children.forEach(child => child.removeEventListener("click", listener));
   }
 
-  function getBoardElement() { return board; }
+  function getBoardElement() { return boardEle; }
+
+  function getBoard() { return board; }
+
 
 
   return {
     initBoard,
     getBoardElement,
-    getChild,
-    getChildrenOnRow,
-    getChildrenOnCol,
-    getAllChildren,
-    setChildTextContent,
-    enableOnClickForChildren,
-    removeChildOnClickListener,
-    removeChildrenOnClickListerners,
+    setEntry,
+    enableCellsOnClickListener,
+    removeCellOnClickListener,
+    removeCellsOnClickListerners,
+    getEntry,
+    getEntriesRow,
+    getEntriesCol,
+    getBoard,
   };
 
 })();
